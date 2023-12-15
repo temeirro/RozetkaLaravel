@@ -18,7 +18,19 @@ class CategoryController extends Controller
 
     public function create(Request $request) {
     $input = $request->all();
+    $image = $request->file("image");
+    // create image manager with desired driver
+    $manager = new ImageManager(new Driver());
+    $imageName=uniqid().".webp";
 
+
+        $imageSave = $manager->read($image);
+        // resize image proportionally to 600px width
+        $path = public_path("upload/".$imageName);
+        // save modified image in new format
+        $imageSave->toWebp()->save($path);
+
+    $input["image"]=$imageName;
     $category = Categories::create($input);
     return response()->json($category,201,
         ['Content-Type' => 'application/json;charset=UTF-8', 'Charset' => 'utf-8'], JSON_UNESCAPED_UNICODE);
