@@ -35,4 +35,43 @@ class CategoryController extends Controller
     return response()->json($category,201,
         ['Content-Type' => 'application/json;charset=UTF-8', 'Charset' => 'utf-8'], JSON_UNESCAPED_UNICODE);
     }
+
+    public function delete($id)
+    {
+        $category = Categories::find($id);
+
+        if (!$category) {
+            return response()->json(['error' => 'Category not found'], 404);
+        }
+
+        // Delete the category
+        $category->delete();
+
+        return response()->json(['message' => 'Category deleted successfully']);
+    }
+
+    public function edit($id, Request $request)
+    {
+        $input = $request->all();
+        $file = Categories::find($id);
+        $image = $request->file("image");
+
+        $manager = new ImageManager(new Driver());
+
+        $newFileName = uniqid().".webp";
+        $imageSave = $manager->read($image);
+
+        $path = public_path("upload/".$newFileName);
+            if (is_file($path)) {
+                unlink($path);
+            }
+        $imageSave->toWebp()->save($path);
+
+        $file->image=$newFileName;
+        $file->name = $input['name'];
+        $file->save();
+
+        return response()->json($file);
+    }
+
 }
