@@ -85,17 +85,13 @@ class ProductController extends Controller
         }
         $images = $request->file('images');
         $product = Product::create($input);
-        $sizes = [50,150,300,600,1200];
         // create image manager with desired driver
         $manager = new ImageManager(new Driver());
         if ($request->hasFile('images')) {
             foreach ($images as $image) {
                 $imageName = uniqid() . '.webp';
-                foreach ($sizes as $size) {
-                    $fileSave = $size."_".$imageName;
                     $imageRead = $manager->read($image);
-                    $imageRead->scale(width: $size);
-                    $path=public_path('upload/'.$fileSave);
+                    $path=public_path('upload/'.$imageName);
                     $imageRead->toWebp()->save($path);
                 }
 
@@ -104,7 +100,7 @@ class ProductController extends Controller
                     'name' => $imageName
                 ]);
             }
-        }
+
 
         $product->load('product_images');
 
